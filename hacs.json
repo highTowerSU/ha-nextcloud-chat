@@ -1,6 +1,5 @@
 {
   "name": "Nextcloud Talk Custom Component",
-  "domain": "nextcloud_talk",
   "country": "DE",
   "homeassistant": "2024.10.0",
   "render_readme": true,
