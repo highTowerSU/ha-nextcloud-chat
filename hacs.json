@@ -3,9 +3,7 @@
   "domain": "nextcloud_talk",
   "country": "DE",
   "homeassistant": "2024.10.0",
-  "iot_class": "cloud_push",
   "render_readme": true,
-  "file_name": "custom_components/nextcloud_talk",
   "zip_release": false,
   "filename": "custom_components/nextcloud_talk/manifest.json"
 }
