@@ -1,0 +1,6 @@
+send_message:
+  description: "Send a message to Nextcloud Talk."
+  fields:
+    message:
+      description: "The message to send."
+      example: "Hello from Home Assistant!"
