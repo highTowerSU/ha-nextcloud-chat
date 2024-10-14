@@ -2,10 +2,10 @@
   "name": "Nextcloud Talk Custom Component",
   "domain": "nextcloud_talk",
   "country": "DE",
-  "homeassistant": "2024.10.0",  # Die minimal unterstützte Version von Home Assistant
-  "iot_class": "cloud_push",  # Der Kommunikationsmodus, in diesem Fall cloud_push
-  "render_readme": true,  # README.md wird in HACS gerendert
-  "file_name": "custom_components/nextcloud_talk",  # Pfad zu deinem Custom Component
-  "zip_release": false,  # Falls du Releases als ZIP-Dateien veröffentlichst
+  "homeassistant": "2024.10.0",
+  "iot_class": "cloud_push",
+  "render_readme": true,
+  "file_name": "custom_components/nextcloud_talk",
+  "zip_release": false,
   "filename": "custom_components/nextcloud_talk/manifest.json"
 }
