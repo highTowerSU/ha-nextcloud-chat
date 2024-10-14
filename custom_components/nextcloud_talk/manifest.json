@@ -1,9 +1,9 @@
 {
   "domain": "nextcloud_talk",
   "name": "Nextcloud Talk",
-  "version": "0.1",
-  "documentation": "https://your-documentation-link",
+  "version": "1.0.0",
+  "documentation": "https://github.com/highTowerSU/ha-nextcloud-chat",
   "dependencies": [],
-  "codeowners": ["@your_github_username"],
+  "codeowners": ["@highTowerSU"],
   "requirements": ["requests"]
 }
