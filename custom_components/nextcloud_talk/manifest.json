@@ -1,5 +1,4 @@
 {
-  "domain": "nextcloud_talk",
   "name": "Nextcloud Talk",
   "version": "1.0.0",
   "documentation": "https://github.com/highTowerSU/ha-nextcloud-chat",
