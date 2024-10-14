@@ -6,4 +6,5 @@
   "dependencies": [],
   "codeowners": ["@highTowerSU"],
   "requirements": ["requests"]
+  "issue_tracker": "https://github.com/highTowerSU/ha-nextcloud-chat/issues/",
 }
