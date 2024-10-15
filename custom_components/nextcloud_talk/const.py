@@ -1,0 +1,2 @@
+DOMAIN = "nextcloud_talk"
+
