@@ -1,31 +1,28 @@
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
-from homeassistant.helpers import config_validation as cv
-import requests
-import time
+import aiohttp
 from .const import DOMAIN
 
 LOGIN_POLL_INTERVAL = 5  # Poll every 5 seconds
 
-# Function to start Nextcloud Login Flow v2
-def start_login_flow(base_url):
+# Function to start Nextcloud Login Flow v2 using aiohttp for async requests
+async def start_login_flow(base_url, session):
     login_url = f"{base_url}/index.php/login/v2"
-    response = requests.post(login_url)
-
-    if response.status_code == 200:
-        return response.json()  # Returns the 'poll' and 'login' URLs
+    async with session.post(login_url) as response:
+        if response.status == 200:
+            return await response.json()  # Returns the 'poll' and 'login' URLs
     return None
 
-# Function to poll for the authentication token
-def poll_for_token(poll_url):
+# Function to poll for the authentication token using aiohttp for async requests
+async def poll_for_token(poll_url, session):
     while True:
-        response = requests.get(poll_url)
-        if response.status_code == 200:
-            result = response.json()
-            if result.get("token"):
-                return result.get("token")
-        time.sleep(LOGIN_POLL_INTERVAL)
+        async with session.get(poll_url) as response:
+            if response.status == 200:
+                result = await response.json()
+                if result.get("token"):
+                    return result.get("token")
+        await asyncio.sleep(LOGIN_POLL_INTERVAL)
 
 class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Nextcloud Talk."""
@@ -40,28 +37,24 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             base_url = user_input["url"]
 
-            # Start Login Flow v2
-            login_data = start_login_flow(base_url)
-            if login_data:
-                login_url = login_data["login"]
-                poll_url = login_data["poll"]
-                
-                # Save the poll URL in hass.data for later use
-                self.hass.data[DOMAIN] = {"poll_url": poll_url}
+            # Start Login Flow v2 using aiohttp session
+            async with aiohttp.ClientSession() as session:
+                login_data = await start_login_flow(base_url, session)
+                if login_data:
+                    login_url = login_data["login"]
+                    poll_url = login_data["poll"]
+                    
+                    # Save the poll URL in hass.data for later use
+                    self.hass.data[DOMAIN] = {"poll_url": poll_url}
 
-                # Show the login URL to the user
-                return self.async_external_step(url=login_url)
-            else:
-                errors["base"] = "auth_failed"
+                    # Show the login URL to the user
+                    return self.async_external_step(url=login_url)
+                else:
+                    errors["base"] = "auth_failed"
 
-        # Schema for user to input Nextcloud URL with added description and placeholder
+        # Schema for user to input Nextcloud URL
         data_schema = vol.Schema({
-            vol.Required("url"): vol.All(
-                str,
-                vol.Match(r"^https?://", msg="Invalid URL format. Must start with http:// or https://"),
-                description="Enter the base URL of your Nextcloud instance (e.g., https://nextcloud.example.com)",
-                placeholder="https://nextcloud.example.com"
-            )
+            vol.Required("url"): str
         })
 
         return self.async_show_form(step_id="user", data_schema=data_schema, errors=errors)
@@ -70,15 +63,16 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the external callback once the user has logged in."""
         poll_url = self.hass.data[DOMAIN]["poll_url"]
 
-        # Poll for the token
-        api_token = poll_for_token(poll_url)
+        # Poll for the token using aiohttp session
+        async with aiohttp.ClientSession() as session:
+            api_token = await poll_for_token(poll_url, session)
 
-        if api_token:
-            # Store the API token and complete the config flow
-            return self.async_create_entry(
-                title="Nextcloud Talk",
-                data={"api_token": api_token}
-            )
+            if api_token:
+                # Store the API token and complete the config flow
+                return self.async_create_entry(
+                    title="Nextcloud Talk",
+                    data={"api_token": api_token}
+                )
 
         return self.async_abort(reason="auth_failed")
 
