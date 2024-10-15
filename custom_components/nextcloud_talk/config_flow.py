@@ -25,7 +25,7 @@ async def start_login_flow(base_url, session):
 # Function to poll for the authentication token using aiohttp for async requests
 async def poll_for_token(poll_url, token, session):
     _LOGGER.debug("Starting polling for token with URL: %s", poll_url)
-    timeout = 60  # Set a 1-minute timeout for the polling process
+    timeout = 20  # Set a 1-minute timeout for the polling process
     start_time = asyncio.get_event_loop().time()
 
     headers = {
@@ -46,11 +46,14 @@ async def poll_for_token(poll_url, token, session):
                 _LOGGER.debug("Polling result: %s", result)
                 if result.get("appPassword"):
                     _LOGGER.debug("App password received: %s", result.get("appPassword"))
-                    return result
+                    return {
+                        "server": result.get("server"),
+                        "loginName": result.get("loginName"),
+                        "appPassword": result.get("appPassword")
+                    }
             elif response.status == 404:
                 _LOGGER.debug("Authentication not completed yet. Retrying...")
         await asyncio.sleep(LOGIN_POLL_INTERVAL)
-
 
 class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Nextcloud Talk."""
@@ -80,8 +83,8 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         # Construct the polling URL with the static endpoint and the token
                         poll_url = f"{poll_data['endpoint']}?token={token}"
                         
-                        # Save the poll URL in hass.data for later use
-                        self.hass.data[DOMAIN] = {"poll_url": poll_url}
+                        # Save the poll URL and token in hass.data for later use
+                        self.hass.data[DOMAIN] = {"poll_url": poll_url, "token": token}
                         _LOGGER.debug("Poll URL saved: %s", poll_url)
 
                         # Show the login URL to the user
@@ -99,28 +102,25 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_external(self, user_input=None):
         """Handle the external callback once the user has logged in."""
         poll_url = self.hass.data[DOMAIN].get("poll_url")
+        token = self.hass.data[DOMAIN].get("token")
 
-        # Ensure the poll_url is correctly set
-        if not poll_url:
-            _LOGGER.error("Poll URL is not set. Aborting.")
+        if not poll_url or not token:
+            _LOGGER.error("Poll URL or token is not set. Aborting.")
             return self.async_abort(reason="poll_url_not_set")
 
         _LOGGER.debug("Polling for token with URL: %s", poll_url)
 
-        # Poll for the token using aiohttp session
         async with aiohttp.ClientSession() as session:
-            api_token = await poll_for_token(poll_url, session)
+            credentials = await poll_for_token(poll_url, token, session)
 
-            if api_token:
-                # Store the API token and complete the config flow
-                _LOGGER.debug("API token received: %s", api_token)
+            if credentials:
+                # Store the credentials and complete the config flow
                 return self.async_create_entry(
                     title="Nextcloud Talk",
-                    data={"api_token": api_token}
+                    data=credentials
                 )
 
-        # If the token was not retrieved, return an error message
-        _LOGGER.error("Failed to retrieve API token. Aborting.")
+        _LOGGER.error("Failed to retrieve credentials. Aborting.")
         return self.async_abort(reason="auth_failed")
 
     @staticmethod
