@@ -54,9 +54,14 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 errors["base"] = "auth_failed"
 
-        # Schema for user to input Nextcloud URL
+        # Schema for user to input Nextcloud URL with added description and placeholder
         data_schema = vol.Schema({
-            vol.Required("url"): str
+            vol.Required("url"): vol.All(
+                str,
+                vol.Match(r"^https?://", msg="Invalid URL format. Must start with http:// or https://"),
+                description="Enter the base URL of your Nextcloud instance (e.g., https://nextcloud.example.com)",
+                placeholder="https://nextcloud.example.com"
+            )
         })
 
         return self.async_show_form(step_id="user", data_schema=data_schema, errors=errors)
