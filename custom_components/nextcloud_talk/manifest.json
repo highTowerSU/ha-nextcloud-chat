@@ -1,6 +1,6 @@
 {
   "name": "Nextcloud Talk",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "documentation": "https://github.com/highTowerSU/ha-nextcloud-chat",
   "dependencies": [],
   "codeowners": ["@highTowerSU"],
