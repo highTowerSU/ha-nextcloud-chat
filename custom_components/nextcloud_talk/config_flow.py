@@ -25,7 +25,7 @@ async def start_login_flow(base_url, session):
 # Function to poll for the authentication token using aiohttp for async requests
 async def poll_for_token(poll_url, token, session):
     _LOGGER.debug("Starting polling for token with URL: %s", poll_url)
-    timeout = 20  # Set a 1-minute timeout for the polling process
+    timeout = 60  # Set a 1-minute timeout for the polling process
     start_time = asyncio.get_event_loop().time()
 
     headers = {
@@ -39,11 +39,12 @@ async def poll_for_token(poll_url, token, session):
             return None
 
         # Make a POST request with the token as data
+        _LOGGER.debug("Sending POST request to poll URL...")
         async with session.post(poll_url, headers=headers, data={"token": token}) as response:
             _LOGGER.debug("Polling response status: %s", response.status)
             if response.status == 200:
                 result = await response.json()
-                _LOGGER.debug("Polling result: %s", result)
+                _LOGGER.debug("Polling result received: %s", result)
                 if result.get("appPassword"):
                     _LOGGER.debug("App password received: %s", result.get("appPassword"))
                     return {
@@ -52,7 +53,7 @@ async def poll_for_token(poll_url, token, session):
                         "appPassword": result.get("appPassword")
                     }
             elif response.status == 404:
-                _LOGGER.debug("Authentication not completed yet. Retrying...")
+                _LOGGER.debug("Received 404 status - authentication not completed yet.")
         await asyncio.sleep(LOGIN_POLL_INTERVAL)
 
 class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
