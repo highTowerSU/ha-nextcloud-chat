@@ -7,4 +7,5 @@
   "requirements": ["requests"],
   "domain": "nextcloud_talk",
   "issue_tracker": "https://github.com/highTowerSU/ha-nextcloud-chat/issues/"
+  "config_flow": true
 }
