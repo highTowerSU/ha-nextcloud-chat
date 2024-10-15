@@ -2,6 +2,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 import aiohttp
+import asyncio
 from .const import DOMAIN
 
 LOGIN_POLL_INTERVAL = 5  # Poll every 5 seconds
@@ -61,7 +62,11 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_external(self, user_input=None):
         """Handle the external callback once the user has logged in."""
-        poll_url = self.hass.data[DOMAIN]["poll_url"]
+        poll_url = self.hass.data[DOMAIN].get("poll_url")
+
+        # Ensure the poll_url is correctly set
+        if not poll_url:
+            return self.async_abort(reason="poll_url_not_set")
 
         # Poll for the token using aiohttp session
         async with aiohttp.ClientSession() as session:
@@ -74,6 +79,7 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data={"api_token": api_token}
                 )
 
+        # If the token was not retrieved, return an error message
         return self.async_abort(reason="auth_failed")
 
     @staticmethod
@@ -81,3 +87,4 @@ class NextcloudTalkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_options_flow(config_entry):
         """Handle options flow."""
         return OptionsFlowHandler(config_entry)
+
