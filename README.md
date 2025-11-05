@@ -60,6 +60,25 @@ data:
   message: "This is a message sent to Nextcloud Talk from Home Assistant."
 ```
 
+### Sending media attachments
+
+You can also include images, videos, or arbitrary files by using the same syntax that other Home Assistant notification services
+use. The integration will upload the media to Nextcloud Talk before posting your message.
+
+```yaml
+service: notify.nextcloud_talk
+data:
+  message: "SOS"
+  data:
+    photo:
+      - file: "www/snapshots/cam1_motion_snap.jpg"
+        caption: "Living room camera"
+    video:
+      - file: "/config/www/doorbell.mp4"
+```
+
+Relative paths are resolved against your Home Assistant configuration directory.
+
 ## Receiving Messages
 
 Messages sent to the Nextcloud Talk channel will trigger the webhook registered by this component. You can create automations in Home Assistant based on received messages:
