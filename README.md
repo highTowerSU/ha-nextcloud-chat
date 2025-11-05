@@ -2,6 +2,9 @@
 
 This is a custom component for [Home Assistant](https://www.home-assistant.io) that allows sending and receiving messages through [Nextcloud Talk](https://nextcloud.com/talk/).
 
+> [!TIP]
+> Looking for a more full-featured solution? Check out the actively maintained [Nextcloud Talk Bot Component](https://github.com/klatka/nc-talk-bot-component/releases), which expands on the capabilities of this integration and may be a better fit for your setup.
+
 ## Features
 
 - Send messages to Nextcloud Talk channels using the Nextcloud OCS API.
