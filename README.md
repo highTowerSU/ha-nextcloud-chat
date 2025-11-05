@@ -10,6 +10,17 @@ This is a custom component for [Home Assistant](https://www.home-assistant.io) t
 
 ## Installation
 
+### Via [HACS](https://hacs.xyz)
+
+This repository is compatible with HACS and ships with a `hacs.json` metadata file. To install it via HACS:
+
+1. Open HACS in Home Assistant and choose **Integrations**.
+2. Use the menu in the top-right corner to select **Custom repositories** and add `https://github.com/highTowerSU/ha-nextcloud-chat` as a repository in the **Integration** category.
+3. Search for **Nextcloud Talk Custom Component** in HACS and install it.
+4. Restart Home Assistant after the installation finishes.
+
+### Manual installation
+
 1. **Download the custom component:**
    Clone this repository or download it as a ZIP file and place it in the `custom_components/nextcloud_talk` directory inside your Home Assistant configuration folder.
 
